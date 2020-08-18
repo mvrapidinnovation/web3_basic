@@ -1,10 +1,13 @@
+// Deploying the contract on our Real Test Network(Rinkeby)
+// Using Infura API
+
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
 const { interface, bytecode } = require('./compile');
 
 const provider = new HDWalletProvider(
-    'wash expect rotate tissue bone rug hidden ginger entire tower alarm alone',
-    'https://rinkeby.infura.io/v3/ea43ccca267848309e303c40540a5300'
+    'ACCOUNT MNEMONIC HERE',
+    'INFURA API HERE'
 );
 
 const web3 = new Web3(provider);
