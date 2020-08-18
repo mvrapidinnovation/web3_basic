@@ -1,13 +1,16 @@
 const assert = require('assert');
 const ganache = require('ganache-cli');
 const Web3 = require('web3');
-const { interface, bytecode } = require('../compile');
 
-const web3 = new Web3(ganache.provider()); // <== create an instance of "Web3" constructor
+const provider = ganache.provider();
+const web3 = new Web3(provider); // <== create an instance of "Web3" constructor
+
+const { interface, bytecode } = require('../compile');
 
 let accounts, inbox; // <== declared here so that
                      //     we can use them in describe()
-                     
+const INITIAL_STRING = "Hi There!"
+
 beforeEach(async () => {
     // Get a list of all accounts
     accounts = await web3.eth.getAccounts(); // <== returns account ID of 10 accounts
@@ -16,8 +19,10 @@ beforeEach(async () => {
     // Use one of those accounts to deploy
     inbox = await new web3.eth.Contract(JSON.parse(interface)).deploy({
         data: bytecode,
-        arguments: [ 'Hi There!' ]
+        arguments: [ INITIAL_STRING ]
     }).send({ from: accounts[0], gas: '1000000' });
+
+    inbox.setProvider(provider);
 });
 
 describe('Inbox Contracts', () => {
@@ -28,6 +33,17 @@ describe('Inbox Contracts', () => {
         // This is a good way to test whether
         // contract has deployed successfully or not
         assert.ok(inbox.options.address);
+    });
+
+    it('has a default message', async () => {
+        const message = await inbox.methods.message().call();
+        assert.equal(message, INITIAL_STRING);
+    });
+
+    it('can change the message', async ()=> {
+        await inbox.methods.setMessage('bye').send({ from: accounts[0] });
+        const message = await inbox.methods.message().call();
+        assert.equal(message, 'bye');
     });
 });
 
